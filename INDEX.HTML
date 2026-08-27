@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarberQ - Smart Queue System (Prototype)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Kanit', 'sans-serif'] },
+                    colors: {
+                        primary: '#0ea5e9', // Sky blue 500
+                        primaryDark: '#0284c7', // Sky blue 600
+                        secondary: '#38bdf8',
+                        darkBg: '#0f172a',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #e2e8f0; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s ease-in-out forwards; opacity: 0; transform: translateY(10px); }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Device Preview Frame Styles --- */
+        .preview-wrapper {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 1rem;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #app-frame {
+            background-color: #f8fafc; /* slate-50 */
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Desktop Mode */
+        .mode-pc {
+            width: 100%;
+            height: 100%;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            overflow-y: auto;
+        }
+
+        /* Mobile Mode (iPhone layout) */
+        .mode-mobile {
+            width: 375px;
+            height: 812px;
+            border-radius: 2.5rem;
+            border: 14px solid #1e293b; /* slate-800 */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Dynamic notch for mobile mode */
+        .notch {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background-color: #1e293b;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 100;
+        }
+        .mode-mobile .notch { display: block; }
+        .mode-mobile .nav-header { padding-top: 1.5rem; }
+
+        /* CSS Overrides to force mobile layout when in mobile mode */
+        .mode-mobile .lg\\:flex-row { flex-direction: column !important; }
+        .mode-mobile .lg\\:w-5\\/12, .mode-mobile .lg\\:w-7\\/12 { width: 100% !important; }
+        .mode-mobile .md\\:grid-cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+        .mode-mobile .md\\:block { display: none !important; }
+        .mode-mobile .main-container { padding: 1rem !important; gap: 1rem !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Prototype Controller Bar -->
+    <div class="bg-darkBg text-white py-3 px-6 shadow-md flex items-center justify-between z-[200]">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-code text-primary text-xl"></i>
+            <div>
+                <h1 class="font-bold text-sm leading-tight">BarberQ Prototype</h1>
+                <p class="text-xs text-slate-400">UI/UX Presentation Mode</p>
+            </div>
+        </div>
+        
+        <div class="flex bg-slate-800 rounded-lg p-1">
+            <button id="btn-pc" onclick="switchDevice('pc')" class="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-white text-sm font-medium transition-colors shadow-sm">
+                <i class="fa-solid fa-desktop"></i> PC
+            </button>
+            <button id="btn-mobile" onclick="switchDevice('mobile')" class="flex items-center gap-2 px-4 py-2 rounded-md text-slate-400 hover:text-white text-sm font-medium transition-colors">
+                <i class="fa-solid fa-mobile-screen"></i> Mobile
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Preview Wrapper -->
+    <div class="preview-wrapper">
+        <!-- App Frame (Changes size based on mode) -->
+        <div id="app-frame" class="mode-pc">
+            <div class="notch"></div> <!-- Fake notch for mobile -->
+            
+            <!-- Navbar -->
+            <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 nav-header shadow-sm">
+                <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between h-16">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-primary text-white p-2 rounded-xl w-10 h-10 flex items-center justify-center shadow-md shadow-primary/30">
+                                <i class="fa-solid fa-scissors text-lg"></i>
+                            </div>
+                            <span class="font-bold text-2xl tracking-tight text-slate-800">Barber<span class="text-primary">Q</span></span>
+                        </div>
+                        <div class="hidden md:block">
+                            <span class="bg-slate-100 text-slate-600 text-sm font-medium px-3 py-1.5 rounded-full">
+                                <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> จองคิวรวดเร็วทันใจ
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex flex-col lg:flex-row gap-8 main-container">
+                
+                <!-- Left Column: Status & Info -->
+                <div class="w-full lg:w-5/12 flex flex-col gap-6 fade-in">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                        <div class="flex items-center justify-between mb-4 border-b pb-3">
+                            <h2 class="text-lg font-semibold text-slate-800 flex items-center">
+                                <i class="fa-solid fa-circle-dot text-green-500 mr-2 text-sm animate-pulse"></i> สถานะช่าง (Real-time)
+                            </h2>
+                        </div>
+                        
+                        <div id="dateDisplay" class="bg-slate-50 text-slate-600 text-sm p-3 rounded-lg text-center mb-4 border border-slate-100 hidden">
+                            <!-- Show selected date/time -->
+                        </div>
+
+                        <div id="barberStatusList" class="space-y-3">
+                            <!-- Initial State -->
+                            <div class="text-center text-slate-400 py-6 border-2 border-dashed border-slate-200 rounded-xl">
+                                <div class="bg-slate-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fa-regular fa-calendar-check text-xl text-slate-400"></i>
+                                </div>
+                                <p class="text-sm font-medium">ระบุวันที่และเวลา</p>
+                                <p class="text-xs mt-1">เพื่อตรวจสอบคิวว่างของช่างแต่ละท่าน</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Booking Form -->
+                <div class="w-full lg:w-7/12 fade-in" style="animation-delay: 0.1s;">
+                    <div class="bg-white rounded-2xl shadow-md p-6 sm:p-8 border border-slate-100">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">จองคิวตัดผม</h2>
+                        <p class="text-slate-500 text-sm mb-6">กรอกข้อมูลเพื่อล็อคคิวล่วงหน้า หมดปัญหารอนาน</p>
+
+                        <form id="bookingForm" class="space-y-5" onsubmit="handleFormSubmit(event)">
+                            
+                            <!-- Personal Info -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1" for="name">ชื่อ-นามสกุล</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fa-regular fa-user text-slate-400"></i>
+                                        </div>
+                                        <input type="text" id="name" required
+                                            class="pl-10 w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            placeholder="ชื่อลูกค้า">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1" for="phone">เบอร์ติดต่อ</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fa-solid fa-mobile-screen text-slate-400"></i>
+                                        </div>
+                                        <input type="tel" id="phone" required pattern="[0-9]{9,10}"
+                                            class="pl-10 w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            placeholder="08X-XXX-XXXX">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Date & Time -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1" for="date">วันที่</label>
+                                    <input type="date" id="date" required onchange="fetchAvailability()"
+                                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-slate-700">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1" for="time">เวลา</label>
+                                    <select id="time" required onchange="fetchAvailability()"
+                                        class="w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-slate-700 bg-white">
+                                        <option value="">-- เลือกเวลา --</option>
+                                        <option value="10:00">10:00 น.</option>
+                                        <option value="11:00">11:00 น.</option>
+                                        <option value="13:00">13:00 น.</option>
+                                        <option value="14:00">14:00 น.</option>
+                                        <option value="15:00">15:00 น.</option>
+                                        <option value="16:00">16:00 น.</option>
+                                        <option value="17:00">17:00 น.</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Select Barber -->
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1" for="barber">เลือกช่าง</label>
+                                <div class="relative">
+                                    <select id="barber" required disabled
+                                        class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all appearance-none bg-slate-50 text-slate-500 disabled:cursor-not-allowed">
+                                        <option value="">-- กรุณาระบุวันและเวลาเพื่อเช็กคิวว่าง --</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500">
+                                        <i class="fa-solid fa-chevron-down text-sm"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-4">
+                                <button type="submit" id="submitBtn"
+                                    class="w-full bg-primary hover:bg-primaryDark text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-primary/30 transition-all duration-300 flex justify-center items-center gap-2 transform active:scale-[0.98]">
+                                    <span>ยืนยันการจองคิว</span>
+                                    <i class="fa-solid fa-check-circle"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+            
+            <!-- Success Modal -->
+            <div id="customModal" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center z-[100] p-4 transition-opacity duration-300 opacity-0">
+                <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-sm w-full transform scale-95 transition-transform duration-300" id="modalContent">
+                    <div class="text-center">
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4 animate-bounce">
+                            <i class="fa-solid fa-check text-3xl text-green-500"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">จองคิวสำเร็จ!</h3>
+                        <p class="text-slate-500 mb-6 text-sm">ข้อมูลถูกส่งไปยังระบบหลังบ้านเรียบร้อยแล้ว เตรียมตัวหล่อ/สวยได้เลยครับ</p>
+                        <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-3 rounded-xl transition duration-200">
+                            กลับสู่หน้าหลัก
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- End App Frame -->
+    </div>
+
+    <script>
+        // --- 0. การตั้งค่า API URL (สำหรับวิธีที่ 2) ---
+        // นำ URL ที่ได้จากการ Deploy Web App (ลงท้ายด้วย /exec) มาใส่ที่ตัวแปรนี้
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNRP1hrcyEMnrZH2tB3Iv3LpCpDMeOEaQBpiaVJNikXctZjnhfZpraSNi-ucyTRICz6Q/exec';
+
+        // --- 1. Logic for Device Toggle (Prototype Feature) ---
+        function switchDevice(mode) {
+            const frame = document.getElementById('app-frame');
+            const btnPc = document.getElementById('btn-pc');
+            const btnMobile = document.getElementById('btn-mobile');
+
+            if (mode === 'pc') {
+                frame.className = 'mode-pc';
+                // Style PC button active
+                btnPc.classList.add('bg-primary', 'text-white', 'shadow-sm');
+                btnPc.classList.remove('text-slate-400', 'hover:text-white', 'bg-transparent');
+                // Style Mobile button inactive
+                btnMobile.classList.remove('bg-primary', 'text-white', 'shadow-sm');
+                btnMobile.classList.add('text-slate-400', 'hover:text-white', 'bg-transparent');
+            } else {
+                frame.className = 'mode-mobile';
+                // Style Mobile button active
+                btnMobile.classList.add('bg-primary', 'text-white', 'shadow-sm');
+                btnMobile.classList.remove('text-slate-400', 'hover:text-white', 'bg-transparent');
+                // Style PC button inactive
+                btnPc.classList.remove('bg-primary', 'text-white', 'shadow-sm');
+                btnPc.classList.add('text-slate-400', 'hover:text-white', 'bg-transparent');
+            }
+        }
+
+        // --- 2. Initial Setup ---
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').setAttribute('min', today);
+
+        // Database ช่างทั้งหมด
+        const allBarbers = [
+            { id: 'b1', name: 'ช่างเอก (Master)', rating: 4.9, img: 'อ' },
+            { id: 'b2', name: 'ช่างบอย (Senior)', rating: 4.7, img: 'บ' },
+            { id: 'b3', name: 'ช่างนนท์ (Stylist)', rating: 4.5, img: 'น' }
+        ];
+
+        // --- 3. Mock Real-time API Logic ---
+        function fetchAvailability() {
+            const dateVal = document.getElementById('date').value;
+            const timeVal = document.getElementById('time').value;
+            const statusList = document.getElementById('barberStatusList');
+            const barberSelect = document.getElementById('barber');
+            const dateDisplay = document.getElementById('dateDisplay');
+
+            if (!dateVal || !timeVal) return; // รอให้กรอกครบ
+
+            // Format date for display
+            const dateObj = new Date(dateVal);
+            const dateStr = dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+            dateDisplay.innerHTML = `<i class="fa-regular fa-clock mr-1"></i> เช็กคิวสำหรับ: <span class="font-semibold text-primary">${dateStr} เวลา ${timeVal}</span>`;
+            dateDisplay.classList.remove('hidden');
+
+            // Loading state
+            statusList.innerHTML = `
+                <div class="flex justify-center items-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <span class="ml-3 text-sm text-slate-500">กำลังซิงค์ข้อมูลกับ Database...</span>
+                </div>`;
+            barberSelect.disabled = true;
+            barberSelect.innerHTML = '<option value="">กำลังโหลดช่าง...</option>';
+
+            // เช็กว่ามีการใส่ SCRIPT_URL หรือยัง ถ้ายังให้ทำงานแบบจำลองไปก่อน
+            if (SCRIPT_URL === 'ใส่_URL_ของ_APPS_SCRIPT_ที่นี่') {
+                console.warn("ยังไม่ได้ใส่ SCRIPT_URL: แสดงผลแบบจำลอง");
+                setTimeout(() => { renderBarberStatus([]); }, 800); 
+                return;
+            }
+
+            // โค้ดเชื่อมต่อ API ผ่าน fetch (เช็กคิวว่าง)
+            const urlWithParams = `${SCRIPT_URL}?action=checkAvailability&date=${dateVal}&time=${timeVal}`;
+            
+            fetch(urlWithParams)
+                .then(response => response.json())
+                .then(data => {
+                    renderBarberStatus(data.busyBarbers || []);
+                })
+                .catch(error => {
+                    console.error("Error fetching availability:", error);
+                    renderBarberStatus([]); // ถ้า API เออเร่อ ให้ถือว่าว่างไปก่อนเพื่อไม่ให้ระบบค้าง
+                });
+        }
+
+        // --- 4. Render UI based on Availability ---
+        function renderBarberStatus(busyBarberNames) {
+            const statusList = document.getElementById('barberStatusList');
+            const barberSelect = document.getElementById('barber');
+            
+            let html = '';
+            barberSelect.innerHTML = '<option value="">-- เลือกช่าง --</option>';
+            let hasAvailable = false;
+
+            allBarbers.forEach(barber => {
+                const isBusy = busyBarberNames.includes(barber.name);
+
+                if (!isBusy) {
+                    hasAvailable = true;
+                    // Available UI
+                    html += `
+                    <div class="flex items-center justify-between p-3 rounded-xl border border-primary/20 bg-primary/5 transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white border border-primary/30 flex items-center justify-center text-primary font-bold shadow-sm">
+                                ${barber.img}
+                            </div>
+                            <div>
+                                <p class="font-medium text-slate-800 text-sm leading-tight">${barber.name}</p>
+                                <div class="text-xs text-amber-500 mt-0.5"><i class="fa-solid fa-star text-[10px]"></i> ${barber.rating}</div>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full border border-green-200">
+                            ว่าง
+                        </span>
+                    </div>`;
+                    barberSelect.innerHTML += `<option value="${barber.name}">${barber.name}</option>`;
+                } else {
+                    // Busy UI
+                    html += `
+                    <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 opacity-60 grayscale">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">
+                                ${barber.img}
+                            </div>
+                            <div>
+                                <p class="font-medium text-slate-500 text-sm leading-tight">${barber.name}</p>
+                                <div class="text-[10px] bg-slate-200 text-slate-500 px-1.5 rounded mt-1 inline-block">ติดคิวลูกค้าอื่น</div>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 text-xs font-semibold bg-red-50 text-red-500 rounded-full border border-red-100">
+                            ไม่ว่าง
+                        </span>
+                    </div>`;
+                }
+            });
+
+            if (!hasAvailable) {
+                html = `<div class="text-center p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100">
+                    <i class="fa-solid fa-circle-exclamation mb-1 text-lg block"></i>
+                    ขออภัย ไม่มีช่างว่างในเวลาดังกล่าว
+                </div>`;
+            }
+
+            statusList.innerHTML = html;
+            
+            if (hasAvailable) {
+                barberSelect.disabled = false;
+                barberSelect.classList.remove('bg-slate-50', 'text-slate-500');
+                barberSelect.classList.add('bg-white', 'text-slate-800');
+            } else {
+                barberSelect.disabled = true;
+                barberSelect.innerHTML = '<option value="">-- คิวเต็ม --</option>';
+            }
+        }
+
+        // --- 5. Form Submit Logic ---
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึกลง Database...';
+            
+            // ดึงข้อมูลจากฟอร์ม
+            const formData = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                barber: document.getElementById('barber').value
+            };
+
+            // เช็กว่ามีการใส่ SCRIPT_URL หรือยัง
+            if (SCRIPT_URL === 'ใส่_URL_ของ_APPS_SCRIPT_ที่นี่') {
+                console.warn("ยังไม่ได้ใส่ SCRIPT_URL: บันทึกแบบจำลอง");
+                setTimeout(() => {
+                    showModal();
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }, 1000);
+                return;
+            }
+
+            // โค้ดส่งข้อมูลบันทึกไปยัง API ผ่าน fetch
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                // สำคัญมาก: ต้องใช้ text/plain เพื่อเลี่ยงการติดปัญหา CORS Block ใน Google Apps Script
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'saveBooking', data: formData })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showModal(); // แสดงหน้าต่างสำเร็จ
+                } else {
+                    alert("เกิดข้อผิดพลาด: " + result.message);
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                alert("เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว กรุณาลองใหม่");
+            })
+            .finally(() => {
+                // ไม่ว่าจะสำเร็จหรือพัง ก็ต้องคืนค่าปุ่มกลับมาให้กดใหม่ได้
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+        }
+
+        // --- 6. Modal Logic ---
+        const modal = document.getElementById('customModal');
+        const modalContent = document.getElementById('modalContent');
+
+        function showModal() {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                resetForm();
+            }, 300);
+        }
+
+        function resetForm() {
+            document.getElementById('bookingForm').reset();
+            document.getElementById('barber').disabled = true;
+            document.getElementById('barber').innerHTML = '<option value="">-- กรุณาระบุวันและเวลาเพื่อเช็กคิวว่าง --</option>';
+            document.getElementById('barber').classList.add('bg-slate-50', 'text-slate-500');
+            document.getElementById('barber').classList.remove('bg-white', 'text-slate-800');
+            
+            document.getElementById('dateDisplay').classList.add('hidden');
+            document.getElementById('barberStatusList').innerHTML = `
+                <div class="text-center text-slate-400 py-6 border-2 border-dashed border-slate-200 rounded-xl">
+                    <div class="bg-slate-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-regular fa-calendar-check text-xl text-slate-400"></i>
+                    </div>
+                    <p class="text-sm font-medium">ระบุวันที่และเวลา</p>
+                    <p class="text-xs mt-1">เพื่อตรวจสอบคิวว่างของช่างแต่ละท่าน</p>
+                </div>`;
+        }
+    </script>
+</body>
+</html>
