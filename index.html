@@ -14,8 +14,8 @@
                 extend: {
                     fontFamily: { sans: ['Kanit', 'sans-serif'] },
                     colors: {
-                        primary: '#0ea5e9', // Sky blue 500
-                        primaryDark: '#0284c7', // Sky blue 600
+                        primary: '#0ea5e9',
+                        primaryDark: '#0284c7',
                         secondary: '#38bdf8',
                         darkBg: '#0f172a',
                     }
@@ -25,78 +25,24 @@
     </script>
     <style>
         body { background-color: #e2e8f0; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* Animations */
         .fade-in { animation: fadeIn 0.4s ease-in-out forwards; opacity: 0; transform: translateY(10px); }
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
-
-        /* --- Device Preview Frame Styles --- */
-        .preview-wrapper {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding: 1rem;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        #app-frame {
-            background-color: #f8fafc; /* slate-50 */
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Desktop Mode */
-        .mode-pc {
-            width: 100%;
-            height: 100%;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            overflow-y: auto;
-        }
-
-        /* Mobile Mode (iPhone layout) */
-        .mode-mobile {
-            width: 375px;
-            height: 812px;
-            border-radius: 2.5rem;
-            border: 14px solid #1e293b; /* slate-800 */
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-        /* Dynamic notch for mobile mode */
-        .notch {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 150px;
-            height: 25px;
-            background-color: #1e293b;
-            border-bottom-left-radius: 16px;
-            border-bottom-right-radius: 16px;
-            z-index: 100;
-        }
+        
+        .preview-wrapper { flex-grow: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 1rem; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        #app-frame { background-color: #f8fafc; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); position: relative; display: flex; flex-direction: column; }
+        .mode-pc { width: 100%; height: 100%; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); overflow-y: auto; }
+        .mode-mobile { width: 375px; height: 812px; border-radius: 2.5rem; border: 14px solid #1e293b; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow-y: auto; overflow-x: hidden; }
+        .notch { display: none; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 150px; height: 25px; background-color: #1e293b; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; z-index: 100; }
         .mode-mobile .notch { display: block; }
         .mode-mobile .nav-header { padding-top: 1.5rem; }
-
-        /* CSS Overrides to force mobile layout when in mobile mode */
-        .mode-mobile .lg\\:flex-row { flex-direction: column !important; }
-        .mode-mobile .lg\\:w-5\\/12, .mode-mobile .lg\\:w-7\\/12 { width: 100% !important; }
-        .mode-mobile .md\\:grid-cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
-        .mode-mobile .md\\:block { display: none !important; }
+        .mode-mobile .lg\:flex-row { flex-direction: column !important; }
+        .mode-mobile .lg\:w-5\/12, .mode-mobile .lg\:w-7\/12 { width: 100% !important; }
+        .mode-mobile .md\:grid-cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+        .mode-mobile .md\:block { display: none !important; }
         .mode-mobile .main-container { padding: 1rem !important; gap: 1rem !important; }
     </style>
 </head>
@@ -111,7 +57,6 @@
                 <p class="text-xs text-slate-400">UI/UX Presentation Mode</p>
             </div>
         </div>
-        
         <div class="flex bg-slate-800 rounded-lg p-1">
             <button id="btn-pc" onclick="switchDevice('pc')" class="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-white text-sm font-medium transition-colors shadow-sm">
                 <i class="fa-solid fa-desktop"></i> PC
@@ -122,13 +67,10 @@
         </div>
     </div>
 
-    <!-- Main Preview Wrapper -->
     <div class="preview-wrapper">
-        <!-- App Frame (Changes size based on mode) -->
         <div id="app-frame" class="mode-pc">
-            <div class="notch"></div> <!-- Fake notch for mobile -->
+            <div class="notch"></div>
             
-            <!-- Navbar -->
             <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 nav-header shadow-sm">
                 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex items-center justify-between h-16">
@@ -147,10 +89,9 @@
                 </div>
             </nav>
 
-            <!-- Main Content Area -->
             <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex flex-col lg:flex-row gap-8 main-container">
                 
-                <!-- Left Column: Status & Info -->
+                <!-- Left Column -->
                 <div class="w-full lg:w-5/12 flex flex-col gap-6 fade-in">
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
                         <div class="flex items-center justify-between mb-4 border-b pb-3">
@@ -159,12 +100,9 @@
                             </h2>
                         </div>
                         
-                        <div id="dateDisplay" class="bg-slate-50 text-slate-600 text-sm p-3 rounded-lg text-center mb-4 border border-slate-100 hidden">
-                            <!-- Show selected date/time -->
-                        </div>
+                        <div id="dateDisplay" class="bg-slate-50 text-slate-600 text-sm p-3 rounded-lg text-center mb-4 border border-slate-100 hidden"></div>
 
                         <div id="barberStatusList" class="space-y-3">
-                            <!-- Initial State -->
                             <div class="text-center text-slate-400 py-6 border-2 border-dashed border-slate-200 rounded-xl">
                                 <div class="bg-slate-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                                     <i class="fa-regular fa-calendar-check text-xl text-slate-400"></i>
@@ -184,7 +122,6 @@
 
                         <form id="bookingForm" class="space-y-5" onsubmit="handleFormSubmit(event)">
                             
-                            <!-- Personal Info -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-700 mb-1" for="name">ชื่อ-นามสกุล</label>
@@ -210,7 +147,19 @@
                                 </div>
                             </div>
 
-                            <!-- Date & Time -->
+                            <!-- ส่วนที่เพิ่มใหม่: ช่องกรอกอีเมล -->
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1" for="email">อีเมล (สำหรับรับใบยืนยัน)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fa-regular fa-envelope text-slate-400"></i>
+                                    </div>
+                                    <input type="email" id="email" required
+                                        class="pl-10 w-full rounded-xl border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                        placeholder="example@email.com">
+                                </div>
+                            </div>
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
                                     <label class="block text-sm font-semibold text-slate-700 mb-1" for="date">วันที่</label>
@@ -233,7 +182,6 @@
                                 </div>
                             </div>
 
-                            <!-- Select Barber -->
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1" for="barber">เลือกช่าง</label>
                                 <div class="relative">
@@ -267,7 +215,7 @@
                             <i class="fa-solid fa-check text-3xl text-green-500"></i>
                         </div>
                         <h3 class="text-xl font-bold text-slate-800 mb-2">จองคิวสำเร็จ!</h3>
-                        <p class="text-slate-500 mb-6 text-sm">ข้อมูลถูกส่งไปยังระบบหลังบ้านเรียบร้อยแล้ว เตรียมตัวหล่อ/สวยได้เลยครับ</p>
+                        <p class="text-slate-500 mb-6 text-sm">ข้อมูลถูกส่งไปยังระบบหลังบ้าน และส่งอีเมลยืนยันให้ท่านเรียบร้อยแล้ว</p>
                         <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-3 rounded-xl transition duration-200">
                             กลับสู่หน้าหลัก
                         </button>
@@ -275,15 +223,15 @@
                 </div>
             </div>
 
-        </div> <!-- End App Frame -->
+        </div>
     </div>
 
     <script>
-        // --- 0. การตั้งค่า API URL (สำหรับวิธีที่ 2) ---
-        // นำ URL ที่ได้จากการ Deploy Web App (ลงท้ายด้วย /exec) มาใส่ที่ตัวแปรนี้
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNRP1hrcyEMnrZH2tB3Iv3LpCpDMeOEaQBpiaVJNikXctZjnhfZpraSNi-ucyTRICz6Q/exec';
+        // -------------------------------------------------------------
+        // ⭐️ เปลี่ยน URL ตรงนี้เป็น URL ของ Google Apps Script ที่เพิ่ง Deploy ⭐️
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbySFfGJ0jAa-NL1GHu6cSS-CBW-SfvBni8ITuEHzPp7guhbmsovGPuveE2j_N8agrIH6w/exec';
+        // -------------------------------------------------------------
 
-        // --- 1. Logic for Device Toggle (Prototype Feature) ---
         function switchDevice(mode) {
             const frame = document.getElementById('app-frame');
             const btnPc = document.getElementById('btn-pc');
@@ -291,35 +239,28 @@
 
             if (mode === 'pc') {
                 frame.className = 'mode-pc';
-                // Style PC button active
                 btnPc.classList.add('bg-primary', 'text-white', 'shadow-sm');
                 btnPc.classList.remove('text-slate-400', 'hover:text-white', 'bg-transparent');
-                // Style Mobile button inactive
                 btnMobile.classList.remove('bg-primary', 'text-white', 'shadow-sm');
                 btnMobile.classList.add('text-slate-400', 'hover:text-white', 'bg-transparent');
             } else {
                 frame.className = 'mode-mobile';
-                // Style Mobile button active
                 btnMobile.classList.add('bg-primary', 'text-white', 'shadow-sm');
                 btnMobile.classList.remove('text-slate-400', 'hover:text-white', 'bg-transparent');
-                // Style PC button inactive
                 btnPc.classList.remove('bg-primary', 'text-white', 'shadow-sm');
                 btnPc.classList.add('text-slate-400', 'hover:text-white', 'bg-transparent');
             }
         }
 
-        // --- 2. Initial Setup ---
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('date').setAttribute('min', today);
 
-        // Database ช่างทั้งหมด
         const allBarbers = [
             { id: 'b1', name: 'ช่างเอก (Master)', rating: 4.9, img: 'อ' },
             { id: 'b2', name: 'ช่างบอย (Senior)', rating: 4.7, img: 'บ' },
             { id: 'b3', name: 'ช่างนนท์ (Stylist)', rating: 4.5, img: 'น' }
         ];
 
-        // --- 3. Mock Real-time API Logic ---
         function fetchAvailability() {
             const dateVal = document.getElementById('date').value;
             const timeVal = document.getElementById('time').value;
@@ -327,15 +268,13 @@
             const barberSelect = document.getElementById('barber');
             const dateDisplay = document.getElementById('dateDisplay');
 
-            if (!dateVal || !timeVal) return; // รอให้กรอกครบ
+            if (!dateVal || !timeVal) return; 
 
-            // Format date for display
             const dateObj = new Date(dateVal);
             const dateStr = dateObj.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
             dateDisplay.innerHTML = `<i class="fa-regular fa-clock mr-1"></i> เช็กคิวสำหรับ: <span class="font-semibold text-primary">${dateStr} เวลา ${timeVal}</span>`;
             dateDisplay.classList.remove('hidden');
 
-            // Loading state
             statusList.innerHTML = `
                 <div class="flex justify-center items-center py-8">
                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -344,28 +283,22 @@
             barberSelect.disabled = true;
             barberSelect.innerHTML = '<option value="">กำลังโหลดช่าง...</option>';
 
-            // เช็กว่ามีการใส่ SCRIPT_URL หรือยัง ถ้ายังให้ทำงานแบบจำลองไปก่อน
             if (SCRIPT_URL === 'ใส่_URL_ของ_APPS_SCRIPT_ที่นี่') {
-                console.warn("ยังไม่ได้ใส่ SCRIPT_URL: แสดงผลแบบจำลอง");
-                setTimeout(() => { renderBarberStatus([]); }, 800); 
+                alert('ยังไม่ได้ใส่ URL ของ Apps Script ในโค้ดครับ!');
                 return;
             }
 
-            // โค้ดเชื่อมต่อ API ผ่าน fetch (เช็กคิวว่าง)
             const urlWithParams = `${SCRIPT_URL}?action=checkAvailability&date=${dateVal}&time=${timeVal}`;
             
             fetch(urlWithParams)
                 .then(response => response.json())
-                .then(data => {
-                    renderBarberStatus(data.busyBarbers || []);
-                })
+                .then(data => renderBarberStatus(data.busyBarbers || []))
                 .catch(error => {
                     console.error("Error fetching availability:", error);
-                    renderBarberStatus([]); // ถ้า API เออเร่อ ให้ถือว่าว่างไปก่อนเพื่อไม่ให้ระบบค้าง
+                    renderBarberStatus([]); 
                 });
         }
 
-        // --- 4. Render UI based on Availability ---
         function renderBarberStatus(busyBarberNames) {
             const statusList = document.getElementById('barberStatusList');
             const barberSelect = document.getElementById('barber');
@@ -379,47 +312,36 @@
 
                 if (!isBusy) {
                     hasAvailable = true;
-                    // Available UI
                     html += `
                     <div class="flex items-center justify-between p-3 rounded-xl border border-primary/20 bg-primary/5 transition-all">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-white border border-primary/30 flex items-center justify-center text-primary font-bold shadow-sm">
-                                ${barber.img}
-                            </div>
+                            <div class="w-10 h-10 rounded-full bg-white border border-primary/30 flex items-center justify-center text-primary font-bold shadow-sm">${barber.img}</div>
                             <div>
                                 <p class="font-medium text-slate-800 text-sm leading-tight">${barber.name}</p>
                                 <div class="text-xs text-amber-500 mt-0.5"><i class="fa-solid fa-star text-[10px]"></i> ${barber.rating}</div>
                             </div>
                         </div>
-                        <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full border border-green-200">
-                            ว่าง
-                        </span>
+                        <span class="px-2.5 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full border border-green-200">ว่าง</span>
                     </div>`;
                     barberSelect.innerHTML += `<option value="${barber.name}">${barber.name}</option>`;
                 } else {
-                    // Busy UI
                     html += `
                     <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 opacity-60 grayscale">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">
-                                ${barber.img}
-                            </div>
+                            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold">${barber.img}</div>
                             <div>
                                 <p class="font-medium text-slate-500 text-sm leading-tight">${barber.name}</p>
                                 <div class="text-[10px] bg-slate-200 text-slate-500 px-1.5 rounded mt-1 inline-block">ติดคิวลูกค้าอื่น</div>
                             </div>
                         </div>
-                        <span class="px-2.5 py-1 text-xs font-semibold bg-red-50 text-red-500 rounded-full border border-red-100">
-                            ไม่ว่าง
-                        </span>
+                        <span class="px-2.5 py-1 text-xs font-semibold bg-red-50 text-red-500 rounded-full border border-red-100">ไม่ว่าง</span>
                     </div>`;
                 }
             });
 
             if (!hasAvailable) {
                 html = `<div class="text-center p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100">
-                    <i class="fa-solid fa-circle-exclamation mb-1 text-lg block"></i>
-                    ขออภัย ไม่มีช่างว่างในเวลาดังกล่าว
+                    <i class="fa-solid fa-circle-exclamation mb-1 text-lg block"></i> ขออภัย ไม่มีช่างว่างในเวลาดังกล่าว
                 </div>`;
             }
 
@@ -435,7 +357,6 @@
             }
         }
 
-        // --- 5. Form Submit Logic ---
         function handleFormSubmit(event) {
             event.preventDefault();
             
@@ -444,37 +365,25 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึกลง Database...';
             
-            // ดึงข้อมูลจากฟอร์ม
+            // ดึงข้อมูลอีเมลไปด้วย
             const formData = {
                 name: document.getElementById('name').value,
                 phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
                 date: document.getElementById('date').value,
                 time: document.getElementById('time').value,
                 barber: document.getElementById('barber').value
             };
 
-            // เช็กว่ามีการใส่ SCRIPT_URL หรือยัง
-            if (SCRIPT_URL === 'ใส่_URL_ของ_APPS_SCRIPT_ที่นี่') {
-                console.warn("ยังไม่ได้ใส่ SCRIPT_URL: บันทึกแบบจำลอง");
-                setTimeout(() => {
-                    showModal();
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }, 1000);
-                return;
-            }
-
-            // โค้ดส่งข้อมูลบันทึกไปยัง API ผ่าน fetch
             fetch(SCRIPT_URL, {
                 method: 'POST',
-                // สำคัญมาก: ต้องใช้ text/plain เพื่อเลี่ยงการติดปัญหา CORS Block ใน Google Apps Script
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({ action: 'saveBooking', data: formData })
             })
             .then(response => response.json())
             .then(result => {
                 if (result.success) {
-                    showModal(); // แสดงหน้าต่างสำเร็จ
+                    showModal();
                 } else {
                     alert("เกิดข้อผิดพลาด: " + result.message);
                 }
@@ -484,13 +393,11 @@
                 alert("เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว กรุณาลองใหม่");
             })
             .finally(() => {
-                // ไม่ว่าจะสำเร็จหรือพัง ก็ต้องคืนค่าปุ่มกลับมาให้กดใหม่ได้
                 btn.disabled = false;
                 btn.innerHTML = originalText;
             });
         }
 
-        // --- 6. Modal Logic ---
         const modal = document.getElementById('customModal');
         const modalContent = document.getElementById('modalContent');
 
@@ -519,7 +426,6 @@
             document.getElementById('barber').innerHTML = '<option value="">-- กรุณาระบุวันและเวลาเพื่อเช็กคิวว่าง --</option>';
             document.getElementById('barber').classList.add('bg-slate-50', 'text-slate-500');
             document.getElementById('barber').classList.remove('bg-white', 'text-slate-800');
-            
             document.getElementById('dateDisplay').classList.add('hidden');
             document.getElementById('barberStatusList').innerHTML = `
                 <div class="text-center text-slate-400 py-6 border-2 border-dashed border-slate-200 rounded-xl">
