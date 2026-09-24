@@ -228,7 +228,7 @@
 
     <script>
         // -------------------------------------------------------------
-        // ⭐️ เปลี่ยน URL ตรงนี้เป็น URL ของ Google Apps Script ที่เพิ่ง Deploy ⭐️
+        // ⭐️ เปลี่ยน URL ตรงนี้เป็น URL ของ Google Apps Script ที่เพิ่ง Deploy ใหม่ ⭐️
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHmui6mZcJm9XDmZtC1PcN8BQbOBMMWRjMK2Owbq66cc6XcbYzD0HXIIzSMm9knwMUVg/exec';
         // -------------------------------------------------------------
 
@@ -365,7 +365,7 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึกลง Database...';
             
-            // ดึงข้อมูลอีเมลไปด้วย
+            // ส่งค่า formData.email เข้าไปแล้ว
             const formData = {
                 name: document.getElementById('name').value,
                 phone: document.getElementById('phone').value,
